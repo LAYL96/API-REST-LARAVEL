@@ -7,7 +7,10 @@ use Illuminate\Http\Request;
 class UserController extends Controller
 {
     public function register(Request $request){
-        
+        $name = $request->input('name');
+        $surname = $request->input('surname');
+
+        return "Accion de registro de usuario: $name $surname";
     }
 
     public function login(Request $request){
