@@ -37,3 +37,5 @@ CONSTRAINT pk_posts PRIMARY KEY(id),
 CONSTRAINT fk_post_user FOREIGN KEY(user_id) REFERENCES users(id),
 CONSTRAINT fk_post_category FOREIGN KEY(category_id) REFERENCES categories(id)
 )ENGINE=InnoDb;
+
+INSERT INTO `users` (`id`, `name`, `surname`, `role`, `email`, `password`, `description`, `image`, `created_at`, `updated_at`, `remember_token`) VALUES (NULL, 'juan', 'juan', 'ROLE_USER', 'juan@juan.com', 'juan', NULL, NULL, '2023-09-18 16:47:30', '2023-09-18 16:47:30', NULL);
