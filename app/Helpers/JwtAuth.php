@@ -3,13 +3,13 @@
 namespace App\Helpers;
 
 use Firebase\JWT\JWT;
-use Iluminate\Support\Facades\DB;
+use Illuminate\Support\Facades\DB;
 use App\Models\User;
 
 class JwtAuth
 {
 
-    public $key;
+    protected $key;
 
     public function __construct()
     {
@@ -19,46 +19,34 @@ class JwtAuth
     public function signup($email, $password, $getToken = null)
     {
         // Buscar si existe el usuario con sus credenciales
-        $user = User::where([
-            'email' => $email,
-            'password' => $password
-        ])->first();
+        $user = User::where('email', $email)->first();
 
-        // Comprobar si son correctas(objeto)
-        $singup = false;
-        if(is_object($user)){
-            $singup = true;
+        // Comprobar si el usuario existe y la contraseña coincide
+        if (!$user || !password_verify($password, $user->password)) {
+            return [
+                'status' => 'error',
+                'message' => 'Credenciales incorrectas.'
+            ];
         }
 
         // Generar el token con los datos del usuario identificado
-        if($singup){
+        $token = [
+            'sub'       =>  $user->id,
+            'email'     =>  $user->email,
+            'name'      =>  $user->name,
+            'surname'   =>  $user->surname,
+            'iat'       =>  time(),
+            'exp'       =>  time() + (7 * 24 * 60 * 60)
+        ];
 
-            $token = array(
-                'sub'       =>  $user->id,
-                'email'     =>  $user->email,
-                'name'      =>  $user->name,
-                'surname'   =>  $user->surname,
-                'iat'       =>  time(),
-                'exp'       =>  time() + (7 * 24 * 60 * 60)
-            );
+        $jwt = JWT::encode($token, $this->key, 'HS256');
 
-            $jwt = JWT::encode($token, $this->key, 'HS256');
+        // Devolver los datos decodificados o el token, en función de un parámetro
+        if ($getToken === true) {
             $decoded = JWT::decode($jwt, $this->key, ['HS256']);
-
-            // Devolver los datos decodificados o el token, en funcion de un parametro
-            if(is_null($getToken)){
-                $data =  $jwt;
-            }else{
-                $data = $decoded;
-            }
-
-        }else{
-            $data = array(
-                'status' => 'error',
-                'message' => 'Login incorrecto.'
-            );
-        }        
-
-        return $data;
+            return $decoded;
+        } else {
+            return $jwt;
+        }
     }
 }
